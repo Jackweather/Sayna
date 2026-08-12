@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Let's Meet Up</title>
+  <style>
+    :root {
+      --bg-start: #f8efe7;
+      --bg-end: #d8e2dc;
+      --card: rgba(255, 255, 255, 0.88);
+      --text: #2f241f;
+      --accent: #c1664f;
+      --accent-dark: #914635;
+      --button-alt: #efe6dd;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at top, rgba(255, 255, 255, 0.9), transparent 35%),
+        linear-gradient(135deg, var(--bg-start), var(--bg-end));
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: 2rem 1rem;
+    }
+
+    .card {
+      width: min(96vw, 760px);
+      padding: 2.5rem;
+      border-radius: 28px;
+      background: var(--card);
+      box-shadow: 0 24px 60px rgba(73, 44, 33, 0.18);
+      text-align: center;
+      position: relative;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      line-height: 1.05;
+    }
+
+    p {
+      margin: 1rem 0 0;
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 2rem;
+      position: relative;
+      min-height: 64px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 0.95rem 1.6rem;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(73, 44, 33, 0.16);
+    }
+
+    #yesBtn {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    #yesBtn:hover {
+      background: var(--accent-dark);
+    }
+
+    #noBtn {
+      background: var(--button-alt);
+      color: var(--text);
+      position: absolute;
+      left: 50%;
+      transform: translateX(70px);
+    }
+
+    .answer {
+      margin-top: 1.5rem;
+      min-height: 2rem;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--accent-dark);
+    }
+
+    .calendar {
+      margin-top: 2rem;
+      text-align: left;
+      display: none;
+    }
+
+    .calendar.visible {
+      display: block;
+    }
+
+    .confirmation-screen {
+      margin-top: 2rem;
+      display: none;
+      text-align: center;
+    }
+
+    .confirmation-screen.visible {
+      display: block;
+    }
+
+    .confirmation-card {
+      padding: 1.5rem;
+      border-radius: 24px;
+      background: #fff7f1;
+      color: var(--accent-dark);
+      box-shadow: inset 0 0 0 2px #efddcf;
+    }
+
+    .confirmation-card h2 {
+      margin: 0 0 0.75rem;
+      font-size: 1.5rem;
+    }
+
+    .confirmation-details {
+      font-size: 1.1rem;
+      font-weight: 700;
+      line-height: 1.6;
+    }
+
+    .back-wrap {
+      display: flex;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    #backBtn {
+      background: var(--button-alt);
+      color: var(--text);
+    }
+
+    .calendar h2 {
+      margin: 0 0 1rem;
+      font-size: 1.4rem;
+      text-align: center;
+    }
+
+    .date-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+
+    .empty-note {
+      padding: 1rem;
+      border-radius: 18px;
+      background: #fff7f1;
+      color: var(--accent-dark);
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .section-label {
+      margin: 1.5rem 0 0.75rem;
+      font-size: 1rem;
+      font-weight: 700;
+      text-align: center;
+      color: var(--accent-dark);
+    }
+
+    .date-option {
+      padding: 0.85rem 0.75rem;
+      border-radius: 18px;
+      background: #fff7f1;
+      color: var(--accent-dark);
+      text-align: center;
+      font-weight: 700;
+      border: 2px solid transparent;
+    }
+
+    .date-option:hover {
+      border-color: var(--accent);
+    }
+
+    .date-option.selected,
+    .time-option.selected,
+    .shop-option.selected {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent-dark);
+    }
+
+    .time-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .time-option {
+      padding: 0.75rem 0.5rem;
+      border-radius: 18px;
+      background: #fff;
+      color: var(--text);
+      text-align: center;
+      font-weight: 700;
+      border: 2px solid #ead8cd;
+    }
+
+    .time-option:hover {
+      border-color: var(--accent);
+    }
+
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .shop-option {
+      padding: 0.85rem 0.75rem;
+      border-radius: 18px;
+      background: #fff;
+      color: var(--text);
+      text-align: center;
+      font-weight: 700;
+      border: 2px solid #ead8cd;
+    }
+
+    .shop-option:hover {
+      border-color: var(--accent);
+    }
+
+    .confirm-wrap {
+      display: flex;
+      justify-content: center;
+      margin-top: 1.25rem;
+    }
+
+    #confirmBtn {
+      background: var(--accent-dark);
+      color: #fff;
+      display: none;
+    }
+
+    #confirmBtn.visible {
+      display: inline-block;
+    }
+
+    #backBtn:disabled,
+    #confirmBtn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    @media (max-width: 520px) {
+      .date-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .time-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .shop-grid {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Let's meet up and grab some coffee.</h1>
+
+    <div class="buttons" id="buttonArea">
+      <button id="yesBtn" type="button">Yes</button>
+      <button id="noBtn" type="button">No</button>
+    </div>
+
+    <div class="answer" id="answer"></div>
+
+    <section class="calendar" id="calendar">
+      <h2>Pick a date and time</h2>
+      <div class="section-label">Available dates</div>
+      <div class="date-grid" id="dateGrid"></div>
+      <div class="section-label">Available times</div>
+      <div class="time-grid">
+        <div class="time-option">8:00 AM</div>
+        <div class="time-option">8:30 AM</div>
+        <div class="time-option">9:00 AM</div>
+        <div class="time-option">9:30 AM</div>
+        <div class="time-option">10:00 AM</div>
+        <div class="time-option">10:30 AM</div>
+        <div class="time-option">11:00 AM</div>
+      </div>
+      <div class="section-label">Coffee shops</div>
+      <div class="shop-grid">
+        <div class="shop-option">Java Nation</div>
+        <div class="shop-option">Vigilante Coffee</div>
+        <div class="shop-option">Proteus Brews</div>
+        <div class="shop-option">Black Lion Cafe</div>
+        <div class="shop-option">Coffee Pastry</div>
+        <div class="shop-option">Takoma Beverage Company</div>
+        <div class="shop-option">PJ's Coffee</div>
+      </div>
+      <div class="confirm-wrap">
+        <button id="confirmBtn" type="button">Confirm date and time</button>
+      </div>
+    </section>
+
+    <section class="confirmation-screen" id="confirmationScreen">
+      <div class="confirmation-card">
+        <h2>Confirmed</h2>
+        <div class="confirmation-details" id="confirmationDetails"></div>
+      </div>
+      <div class="back-wrap">
+        <button id="backBtn" type="button">Back to change it</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const answer = document.getElementById("answer");
+    const buttonArea = document.getElementById("buttonArea");
+    const calendar = document.getElementById("calendar");
+    const confirmBtn = document.getElementById("confirmBtn");
+    const confirmationScreen = document.getElementById("confirmationScreen");
+    const confirmationDetails = document.getElementById("confirmationDetails");
+    const backBtn = document.getElementById("backBtn");
+    const dateGrid = document.getElementById("dateGrid");
+    const timeOptions = Array.from(document.querySelectorAll(".time-option"));
+    const shopOptions = Array.from(document.querySelectorAll(".shop-option"));
+    const availableDates = [
+      { month: 8, day: 15, label: "Friday, August 15" },
+      { month: 8, day: 16, label: "Saturday, August 16" },
+      { month: 8, day: 19, label: "Tuesday, August 19" },
+      { month: 8, day: 20, label: "Wednesday, August 20" },
+      { month: 8, day: 24, label: "Sunday, August 24" },
+      { month: 8, day: 31, label: "Sunday, August 31" },
+      { month: 9, day: 5, label: "Friday, September 5" },
+      { month: 9, day: 6, label: "Saturday, September 6" },
+      { month: 9, day: 7, label: "Sunday, September 7" },
+      { month: 9, day: 8, label: "Monday, September 8" }
+    ];
+    let selectedDate = "";
+    let selectedTime = "";
+    let selectedShop = "";
+    let dateOptions = [];
+    let isLocked = false;
+
+    function bindDateOptions() {
+      dateOptions.forEach((option) => {
+        option.addEventListener("click", () => {
+          if (isLocked) {
+            return;
+          }
+
+          selectOption(dateOptions, option);
+          selectedDate = option.textContent.trim();
+          answer.textContent = selectedTime
+            ? `Selected ${selectedDate} at ${selectedTime}.`
+            : `Selected ${selectedDate}. Now pick a time.`;
+          updateConfirmButton();
+        });
+      });
+    }
+
+    function renderDateOptions(serverDateText) {
+      const today = serverDateText ? new Date(`${serverDateText}T00:00:00`) : new Date();
+      today.setHours(0, 0, 0, 0);
+      const year = today.getFullYear();
+
+      dateGrid.innerHTML = "";
+
+      availableDates.forEach((entry) => {
+        const entryDate = new Date(year, entry.month - 1, entry.day);
+        if (entryDate < today) {
+          return;
+        }
+
+        const option = document.createElement("div");
+        option.className = "date-option";
+        option.textContent = entry.label;
+        dateGrid.appendChild(option);
+      });
+
+      if (!dateGrid.children.length) {
+        const note = document.createElement("div");
+        note.className = "empty-note";
+        note.textContent = "No dates are available right now.";
+        dateGrid.appendChild(note);
+      }
+
+      dateOptions = Array.from(document.querySelectorAll(".date-option"));
+      bindDateOptions();
+    }
+
+    function showPicker() {
+      calendar.classList.add("visible");
+      confirmationScreen.classList.remove("visible");
+    }
+
+    function showConfirmation(date, time, shop, isSaved) {
+      calendar.classList.remove("visible");
+      confirmationScreen.classList.add("visible");
+      confirmationDetails.textContent = `${date} at ${time} at ${shop}`;
+      if (isLocked) {
+        answer.textContent = `Locked in: ${date} at ${time} at ${shop}.`;
+      } else {
+        answer.textContent = isSaved
+          ? `Saved date: ${date} at ${time} at ${shop}.`
+          : `Confirmed for ${date} at ${time} at ${shop}.`;
+      }
+    }
+
+    function updateConfirmButton() {
+      if (selectedDate && selectedTime && selectedShop) {
+        confirmBtn.classList.add("visible");
+      } else {
+        confirmBtn.classList.remove("visible");
+      }
+    }
+
+    function selectOption(options, element) {
+      options.forEach((option) => option.classList.remove("selected"));
+      element.classList.add("selected");
+    }
+
+    function findOption(options, value) {
+      return options.find((option) => option.textContent.trim() === value);
+    }
+
+    function applySavedConfirmation(date, time, shop, locked) {
+      selectedDate = date;
+      selectedTime = time;
+      selectedShop = shop;
+      isLocked = Boolean(locked);
+
+      const dateOption = findOption(dateOptions, date);
+      const timeOption = findOption(timeOptions, time);
+      const shopOption = findOption(shopOptions, shop);
+
+      if (dateOption) {
+        selectOption(dateOptions, dateOption);
+      }
+
+      if (timeOption) {
+        selectOption(timeOptions, timeOption);
+      }
+
+      if (shopOption) {
+        selectOption(shopOptions, shopOption);
+      }
+
+      yesBtn.textContent = "See you there";
+      noBtn.style.display = "none";
+      showConfirmation(date, time, shop, true);
+      confirmBtn.classList.add("visible");
+      confirmBtn.textContent = "Confirmed";
+      confirmBtn.disabled = true;
+      backBtn.disabled = isLocked;
+    }
+
+    function moveNoButton() {
+      const areaRect = buttonArea.getBoundingClientRect();
+      const maxX = Math.max(0, areaRect.width - noBtn.offsetWidth);
+      const maxY = Math.max(0, areaRect.height + 140 - noBtn.offsetHeight);
+      const nextX = Math.random() * maxX;
+      const nextY = Math.random() * maxY;
+
+      noBtn.style.left = `${nextX}px`;
+      noBtn.style.top = `${nextY}px`;
+    }
+
+    function rejectNoChoice() {
+      moveNoButton();
+      answer.textContent = "Nope, you can't click no. Pick yes.";
+    }
+
+    noBtn.addEventListener("mouseenter", moveNoButton);
+    noBtn.addEventListener("click", rejectNoChoice);
+
+    timeOptions.forEach((option) => {
+      option.addEventListener("click", () => {
+        if (isLocked) {
+          return;
+        }
+
+        selectOption(timeOptions, option);
+        selectedTime = option.textContent.trim();
+        answer.textContent = selectedDate
+          ? `Selected ${selectedDate} at ${selectedTime}. Now pick a coffee shop.`
+          : `Selected ${selectedTime}. Now pick a date.`;
+        updateConfirmButton();
+      });
+    });
+
+    shopOptions.forEach((option) => {
+      option.addEventListener("click", () => {
+        if (isLocked) {
+          return;
+        }
+
+        selectOption(shopOptions, option);
+        selectedShop = option.textContent.trim();
+        answer.textContent = selectedDate && selectedTime
+          ? `Selected ${selectedDate} at ${selectedTime} at ${selectedShop}.`
+          : `Selected ${selectedShop}. Now pick a date and time.`;
+        updateConfirmButton();
+      });
+    });
+
+    yesBtn.addEventListener("click", () => {
+      if (isLocked) {
+        answer.textContent = "That date is locked in now.";
+        return;
+      }
+
+      answer.textContent = "Pick a date, time, and coffee shop.";
+      yesBtn.textContent = "See you there";
+      noBtn.style.display = "none";
+      showPicker();
+    });
+
+    confirmBtn.addEventListener("click", async () => {
+      if (!selectedDate || !selectedTime || !selectedShop) {
+        answer.textContent = "Pick a date, time, and coffee shop first.";
+        return;
+      }
+
+      confirmBtn.disabled = true;
+
+      try {
+        const response = await fetch("/confirm", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            date: selectedDate,
+            time: selectedTime,
+            shop: selectedShop
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error("Could not save confirmation.");
+        }
+
+        confirmBtn.textContent = "Confirmed";
+        showConfirmation(selectedDate, selectedTime, selectedShop, false);
+      } catch (error) {
+        answer.textContent = "Could not save that yet. Try again.";
+        confirmBtn.disabled = false;
+      }
+    });
+
+    backBtn.addEventListener("click", () => {
+      if (isLocked) {
+        answer.textContent = "That date is locked in now.";
+        return;
+      }
+
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = "Confirm date and time";
+      updateConfirmButton();
+      answer.textContent = "Pick a new date and time.";
+      showPicker();
+    });
+
+    fetch("/latest-confirmation")
+      .then((response) => response.json())
+      .then((data) => {
+        renderDateOptions(data.server_date);
+        if (data.confirmation && data.confirmation.date && data.confirmation.time && data.confirmation.shop) {
+          applySavedConfirmation(
+            data.confirmation.date,
+            data.confirmation.time,
+            data.confirmation.shop,
+            data.locked
+          );
+        }
+      })
+      .catch(() => {
+        renderDateOptions();
+      });
+  </script>
+</body>
+</html>

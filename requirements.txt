@@ -1,0 +1,8 @@
+Flask>=2.0
+matplotlib
+cartopy
+requests
+Pillow
+psutil
+xarray
+cfgrib
